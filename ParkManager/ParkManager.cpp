@@ -1,6 +1,7 @@
-// ParkManager.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£//
+ï»¿// ParkManager.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚//
 
 #include "stdafx.h"
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #define MaxSize 3
@@ -31,7 +32,7 @@ typedef struct
 	QNode *rear;
 }LiQueue;
 
-//Õ»²Ù×÷
+//æ ˆæ“ä½œ
 void initStack(SqStack *&s)
 {
 	s = (SqStack *)malloc(sizeof(SqStack));
@@ -60,12 +61,12 @@ bool isFull(SqStack *s)
 
 int searchCar(SqStack *stack,char *s)
 {
-	//·µ»ØĞèÒªµ¯Õ»µÄÆû³µÊıÁ¿(²»°üÀ¨Àë¿ªÍ£³µ³¡µÄÄÇÒ»Á¾)
+	//è¿”å›éœ€è¦å¼¹æ ˆçš„æ±½è½¦æ•°é‡(ä¸åŒ…æ‹¬ç¦»å¼€åœè½¦åœºçš„é‚£ä¸€è¾†)
 	Car *temp = (Car *)stack;
 	int order = 0;
 	while (strcmp(stack->data[order].number, s)!=0 && order <= stack->top)order++;
-	if (order < stack->top)return stack->top - order;       //order<topËµÃ÷ÕÒµ½ÁË
-	if (strcmp(stack->data[stack->top].number, s)!=0)return -1;     //·ñÔò¿´Õ»¶¥ÔªËØÊÇ·ñÊÇÒªÕÒµÄ³µÁ¾
+	if (order < stack->top)return stack->top - order;       //order<topè¯´æ˜æ‰¾åˆ°äº†
+	if (strcmp(stack->data[stack->top].number, s)!=0)return -1;     //å¦åˆ™çœ‹æ ˆé¡¶å…ƒç´ æ˜¯å¦æ˜¯è¦æ‰¾çš„è½¦è¾†
 	else return stack->top-order;
 }
 
@@ -79,17 +80,29 @@ void s2s(SqStack *source, SqStack *destination,int times)
 	}
 }
 
+char *convert(int timestamp)
+{
+	time_t t;
+	struct tm *p;
+	t = timestamp;
+	p = gmtime(&t);
+	static char s[100];
+	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", p);
+	return s;
+}
 void printStack(SqStack *stack)
 {
-	printf("\n------Í£³µ³¡-----\n");
+	printf("\n------------------\n è½¦ç‰Œå·\tåœè½¦æ—¶é—´\n");
+	printf("------åœè½¦åœº-----\n");
 	for (int i = 0; i <= stack->top; i++)
 	{
-		printf("  %s\t%d\n", stack->data[i].number, stack->data[i].minute);
+		printf(" %s\t%s\n", stack->data[i].number,convert(stack->data[i].minute));
 	}
-	printf("------Í£³µ³¡-----\n");
+	printf("------åœè½¦åœº-----\n");
 }
 
-//¶ÓÁĞ²Ù×÷
+
+//é˜Ÿåˆ—æ“ä½œ
 void initQueue(LiQueue *&q)
 {
 	q = (LiQueue *)malloc(sizeof(LiQueue));
@@ -125,13 +138,13 @@ bool deQueue(LiQueue *q, Car &e)
 void printQueue(LiQueue *queue)
 {
 	QNode *t = queue->front;
-	printf("-------±ãµÀ------\n");
+	printf("-------ä¾¿é“------\n");
 	while (t != NULL)
 	{
-		printf("  %s\t%d\n", t->data.number, t->data.minute);
+		printf(" %s\t%s\n", t->data.number,convert(t->data.minute) );
 		t = t->next;
 	}
-	printf("-------±ãµÀ------\n");
+	printf("-------ä¾¿é“------\n");
 }
 
 
@@ -146,10 +159,9 @@ int main()
 	{
 		char option;
 		char s[8];
-		int time;
+		int mytime;
 		char c;
-		while ((c = getchar()) != EOF && c != '\n');
-		printf("\nÇëÊäÈë²Ù×÷£¨I/O/P£©: ");
+		printf("\nè¯·è¾“å…¥æ“ä½œï¼ˆI.è¿›å…¥è½¦åº“/ O.ç¦»å¼€è½¦åº“/ P.æŸ¥çœ‹åœè½¦æƒ…å†µï¼‰: ");
 		scanf("%c", &option);
 		if (option == 'p' || option == 'P')
 		{
@@ -157,14 +169,13 @@ int main()
 			printQueue(queue);
 			continue;
 		}
-		printf("ÇëÊäÈë³µÅÆºÅ: ");
+		printf("è¯·è¾“å…¥è½¦ç‰Œå·: ");
 		while ((c = getchar()) != EOF && c != '\n');
 		scanf("%s", s);
-		printf("ÇëÊäÈëÊ±¼ä: ");
-		scanf("%d", &time);
+		while ((c = getchar()) != EOF && c != '\n');
 		Car aCar  ;
 		for (int i=0; i < 8; i++)aCar.number[i] = s[i];
-		aCar.minute = time;
+		aCar.minute = time(NULL);
 		if (option == 'i' || option == 'I')
 		{
 			if(!push(stack, aCar))enQueue(queue, aCar);
@@ -176,14 +187,15 @@ int main()
 			int times=searchCar(stack, s);
 			if (times == -1)
 			{
-				printf("³µÁ¾²»´æÔÚ\n");
+				printf("è½¦è¾†ä¸å­˜åœ¨\n");
 				continue;
 			}
 			s2s(stack, tempStack, times);
 			pop(stack, leave);
-			printf("%s³µÍ£ÁôÁË%d·ÖÖÓ£¬ĞèÒª½»·Ñ%dÔª\n", leave.number, time - leave.minute, (time - leave.minute)*PRICE);
+			int nowtime = time(NULL);
+			printf("%sè½¦åœç•™äº†%då°æ—¶ï¼ˆä¸è¶³ä¸€å°æ—¶æŒ‰ä¸€å°æ—¶è®¡è´¹ï¼‰ï¼Œæ¯å°æ—¶%då…ƒï¼Œéœ€è¦äº¤è´¹%då…ƒ\n", leave.number, (nowtime - leave.minute)/3600+1, PRICE, ((nowtime- leave.minute)/3600+1)*PRICE);
 			s2s(tempStack, stack, times);
-			if(deQueue(queue, leave))push(stack, leave);;
+			if(deQueue(queue, leave))push(stack, leave);
 		}
 	}
     return 0;
